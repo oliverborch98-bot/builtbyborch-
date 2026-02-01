@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <title>O.A.E. Tracker | BuiltByBorch</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk8uQS5FLiBUcmFja2VyIiwKICAic2hvcnRfbmFtZSI6ICJPQUUiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiCn0=">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: #000;
+      color: #fff;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 500px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: #000;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .logo span {
+      display: block;
+      font-size: 10px;
+      color: #666;
+      font-weight: 400;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .day-counter {
+      text-align: right;
+    }
+
+    .day-counter .number {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .day-counter .label {
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 16px 20px;
+      background: #0a0a0a;
+      border-bottom: 1px solid #222;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      padding: 16px 20px;
+      border-bottom: 1px solid #222;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: #222;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      transition: width 0.5s ease;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #666;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #222;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 14px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .tab.active {
+      color: #fff;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: #fff;
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* Today View */
+    .today-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .today-header h2 {
+      font-size: 16px;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .today-header .date {
+      font-size: 12px;
+      color: #444;
+      margin-top: 4px;
+    }
+
+    .field-group {
+      margin-bottom: 24px;
+    }
+
+    .field-label {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .field-hint {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 14px;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+      resize: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #555;
+    }
+
+    textarea::placeholder {
+      color: #444;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: #fff;
+      color: #000;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      background: #ddd;
+    }
+
+    .submit-btn:active {
+      background: #ccc;
+    }
+
+    /* History View */
+    .history-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #444;
+    }
+
+    .history-entry {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .history-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #222;
+    }
+
+    .history-day {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .history-date {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .history-section {
+      margin-bottom: 10px;
+    }
+
+    .history-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .history-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .history-section-text {
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.5;
+    }
+
+    /* Completion Screen */
+    .completion {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .completion-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .completion h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .completion p {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .reset-btn {
+      padding: 14px 30px;
+      background: transparent;
+      color: #fff;
+      border: 1px solid #444;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      border-color: #fff;
+    }
+
+    /* Footer */
+    footer {
+      padding: 20px;
+      border-top: 1px solid #222;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 11px;
+      color: #444;
+    }
+
+    footer a {
+      color: #666;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #fff;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Install Prompt */
+    .install-prompt {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
+      border-top: 1px solid #333;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 200;
+    }
+
+    .install-prompt p {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .install-prompt-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .install-btn {
+      padding: 8px 16px;
+      background: #fff;
+      color: #000;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .dismiss-btn {
+      padding: 8px 16px;
+      background: transparent;
+      color: #666;
+      border: 1px solid #333;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        BUILTBYBORCH
+        <span>Observer. Afgør. Eksekver.</span>
+      </div>
+      <div class="day-counter">
+        <div class="number" id="currentDay">1</div>
+        <div class="label">/ 30 dage</div>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="streak">0</div>
+        <div class="stat-label">Streak</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="completed">0</div>
+        <div class="stat-label">Fuldført</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="rate">0%</div>
+        <div class="stat-label">Rate</div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+      <div class="progress-text">
+        <span>Start</span>
+        <span>Dag 30</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="today">Dagens Log</button>
+      <button class="tab" data-tab="history">Historik</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Today View -->
+      <div id="todayView">
+        <div class="today-header">
+          <h2>Dag <span id="dayNumber">1</span> af 30</h2>
+          <div class="date" id="todayDate"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">OBSERVER</div>
+          <div class="field-hint">Hvad observerede du i dag? Hvor ventede du, selvom du vidste bedre?</div>
+          <textarea id="observeInput" rows="3" placeholder="Vær ærlig..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">AFGØR</div>
+          <div class="field-hint">Hvilke beslutninger tog du? Hvor handlede du hurtigt og rigtigt?</div>
+          <textarea id="decideInput" rows="3" placeholder="Beslut uden drama..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">EKSEKVER</div>
+          <div class="field-hint">Hvad skal du gøre hurtigere i morgen? Hvad skal du ignorere?</div>
+          <textarea id="executeInput" rows="3" placeholder="Handling uden følelser..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label" style="color: #666;">DAGENS SEJR (valgfrit)</div>
+          <div class="field-hint">Hvad gjorde du i dag, som du er stolt af?</div>
+          <textarea id="winInput" rows="2" placeholder="Én ting..."></textarea>
+        </div>
+
+        <button class="submit-btn" id="submitBtn">Fuldfør Dag</button>
+      </div>
+
+      <!-- Completion View -->
+      <div id="completionView" class="hidden">
+        <div class="completion">
+          <div class="completion-icon">🏆</div>
+          <h2>Challenge Fuldført!</h2>
+          <p>Du har gennemført 30 dage.<br>Systemet er nu en del af dig.</p>
+          <button class="reset-btn" id="resetBtn">Start Forfra</button>
+        </div>
+      </div>
+
+      <!-- History View -->
+      <div id="historyView" class="hidden">
+        <div id="historyList"></div>
+        <div class="history-empty" id="historyEmpty">
+          Ingen indlæg endnu.<br>Start med at udfylde dagens log.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>© 2025 BuiltByBorch • <a href="https://instagram.com/builtbyborch" target="_blank">@builtbyborch</a></p>
+    </footer>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // State
+    let state = {
+      currentDay: 1,
+      entries: {},
+      activeTab: 'today'
+    };
+
+    // DOM Elements
+    const elements = {
+      currentDay: document.getElementById('currentDay'),
+      dayNumber: document.getElementById('dayNumber'),
+      todayDate: document.getElementById('todayDate'),
+      streak: document.getElementById('streak'),
+      completed: document.getElementById('completed'),
+      rate: document.getElementById('rate'),
+      progressFill: document.getElementById('progressFill'),
+      todayView: document.getElementById('todayView'),
+      historyView: document.getElementById('historyView'),
+      completionView: document.getElementById('completionView'),
+      historyList: document.getElementById('historyList'),
+      historyEmpty: document.getElementById('historyEmpty'),
+      observeInput: document.getElementById('observeInput'),
+      decideInput: document.getElementById('decideInput'),
+      executeInput: document.getElementById('executeInput'),
+      winInput: document.getElementById('winInput'),
+      submitBtn: document.getElementById('submitBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      toast: document.getElementById('toast'),
+      tabs: document.querySelectorAll('.tab')
+    };
+
+    // Load State
+    function loadState() {
+      const saved = localStorage.getItem('oae-tracker-v2');
+      if (saved) {
+        state = JSON.parse(saved);
+      }
+      render();
+    }
+
+    // Save State
+    function saveState() {
+      localStorage.setItem('oae-tracker-v2', JSON.stringify(state));
+    }
+
+    // Calculate Stats
+    function getStreak() {
+      let streak = 0;
+      for (let i = state.currentDay - 1; i >= 1; i--) {
+        if (state.entries[i]?.completed) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    function getCompletedCount() {
+      return Object.values(state.entries).filter(e => e.completed).length;
+    }
+
+    function getCompletionRate() {
+      const total = state.currentDay - 1;
+      if (total === 0) return 0;
+      return Math.round((getCompletedCount() / total) * 100);
+    }
+
+    // Show Toast
+    function showToast(message) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add('show');
+      setTimeout(() => {
+        elements.toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Format Date
+    function formatDate(date) {
+      return date.toLocaleDateString('da-DK', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
+    }
+
+    // Render
+    function render() {
+      // Update day counter
+      elements.currentDay.textContent = state.currentDay;
+      elements.dayNumber.textContent = state.currentDay;
+      elements.todayDate.textContent = formatDate(new Date());
+
+      // Update stats
+      elements.streak.textContent = getStreak();
+      elements.completed.textContent = getCompletedCount();
+      elements.rate.textContent = getCompletionRate() + '%';
+
+      // Update progress
+      const progress = ((state.currentDay - 1) / 30) * 100;
+      elements.progressFill.style.width = progress + '%';
+
+      // Show correct view
+      if (state.currentDay > 30) {
+        elements.todayView.classList.add('hidden');
+        elements.completionView.classList.remove('hidden');
+      } else {
+        elements.todayView.classList.remove('hidden');
+        elements.completionView.classList.add('hidden');
+      }
+
+      // Update submit button
+      elements.submitBtn.textContent = `Fuldfør Dag ${state.currentDay}`;
+
+      // Render history
+      renderHistory();
+    }
+
+    // Render History
+    function renderHistory() {
+      const entries = Object.entries(state.entries).sort(([a], [b]) => Number(b) - Number(a));
+
+      if (entries.length === 0) {
+        elements.historyList.innerHTML = '';
+        elements.historyEmpty.classList.remove('hidden');
+        return;
+      }
+
+      elements.historyEmpty.classList.add('hidden');
+      elements.historyList.innerHTML = entries.map(([day, entry]) => `
+        <div class="history-entry">
+          <div class="history-entry-header">
+            <span class="history-day">Dag ${day}</span>
+            <span class="history-date">${entry.date}</span>
+          </div>
+          <div class="history-section">
+            <div class="history-section-label">Observer</div>
+            <div class="history-section-text">${entry.observe}</div>
+          </div>
+          <div class="history-section">
+            <div class="history-section-label">Afgør</div>
+            <div class="history-section-text">${entry.decide}</div>
+          </div>
+          <div class="history-section">
+            <div class="history-section-label">Eksekver</div>
+            <div class="history-section-text">${entry.execute}</div>
+          </div>
+          ${entry.win ? `
+          <div class="history-section">
+            <div class="history-section-label">Sejr</div>
+            <div class="history-section-text">${entry.win}</div>
+          </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    // Switch Tab
+    function switchTab(tab) {
+      state.activeTab = tab;
+
+      elements.tabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+
+      elements.todayView.classList.toggle('hidden', tab !== 'today' || state.currentDay > 30);
+      elements.historyView.classList.toggle('hidden', tab !== 'history');
+      elements.completionView.classList.toggle('hidden', tab !== 'today' || state.currentDay <= 30);
+    }
+
+    // Submit Entry
+    function submitEntry() {
+      const observe = elements.observeInput.value.trim();
+      const decide = elements.decideInput.value.trim();
+      const execute = elements.executeInput.value.trim();
+      const win = elements.winInput.value.trim();
+
+      if (!observe || !decide || !execute) {
+        showToast('Udfyld alle tre felter');
+        return;
+      }
+
+      state.entries[state.currentDay] = {
+        observe,
+        decide,
+        execute,
+        win,
+        completed: true,
+        date: formatDate(new Date())
+      };
+
+      state.currentDay++;
+      saveState();
+
+      // Clear inputs
+      elements.observeInput.value = '';
+      elements.decideInput.value = '';
+      elements.executeInput.value = '';
+      elements.winInput.value = '';
+
+      // Show toast
+      if (state.currentDay > 30) {
+        showToast('🏆 Challenge fuldført!');
+      } else {
+        showToast(`Dag ${state.currentDay - 1} fuldført! 🔥`);
+      }
+
+      render();
+    }
+
+    // Reset
+    function resetChallenge() {
+      if (confirm('Er du sikker? Dette sletter al din data.')) {
+        state = {
+          currentDay: 1,
+          entries: {},
+          activeTab: 'today'
+        };
+        saveState();
+        render();
+        showToast('Challenge nulstillet');
+      }
+    }
+
+    // Event Listeners
+    elements.tabs.forEach(tab => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+
+    elements.submitBtn.addEventListener('click', submitEntry);
+    elements.resetBtn.addEventListener('click', resetChallenge);
+
+    // Init
+    loadState();
+  </script>
+</body>
+</html>
