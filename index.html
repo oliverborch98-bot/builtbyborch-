@@ -2404,7 +2404,16 @@
       if (currentStep === totalSteps) {
         nextBtn.style.display = 'none';
         submitBtn.style.display = 'block';
-        submitBtn.disabled = true;
+        // Check if all required fields are filled
+        const nameField = document.getElementById('quizName');
+        const emailField = document.getElementById('quizEmail');
+        const emailValid = emailField && emailField.value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailField.value);
+
+        if (nameField && nameField.value && emailValid) {
+          submitBtn.disabled = false;
+        } else {
+          submitBtn.disabled = true;
+        }
       } else {
         nextBtn.style.display = 'block';
         submitBtn.style.display = 'none';
