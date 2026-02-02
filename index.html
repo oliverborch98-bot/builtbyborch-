@@ -2465,9 +2465,10 @@
 
       // Submit form to FormSubmit.co (will auto-redirect to ressourcer.html)
       // Small delay to ensure tracking fires first
-      setTimeout(() => {
-        this.submit();
-      }, 500);
+      var form = this;
+setTimeout(() => {
+  form.submit();
+}, 500);
     });
 
     function resetQuiz() {
